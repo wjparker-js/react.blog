@@ -1,0 +1,328 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  firstName String?
+  lastName  String?
+  password  String
+  role      UserRole @default(AUTHOR)
+  avatar    String?
+  bio       String?  @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  posts            Post[]
+  sessions         UserSession[]
+  passwordResets   PasswordReset[]
+  socialProfiles   SocialProfile[]
+  activityLogs     ActivityLog[]
+
+  @@map("users")
+}
+
+model Post {
+  id          String      @id @default(cuid())
+  title       String      @db.VarChar(255)
+  slug        String      @unique @db.VarChar(255)
+  content     String      @db.LongText
+  excerpt     String?     @db.Text
+  status      PostStatus  @default(DRAFT)
+  publishedAt DateTime?
+  featuredImage String?
+  metaTitle   String?     @db.VarChar(255)
+  metaDescription String? @db.Text
+  ogImage     String?
+  viewCount   Int         @default(0)
+  likeCount   Int         @default(0)
+  authorId    String
+  categoryId  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags         PostTag[]
+  comments     Comment[]
+  media        PostMedia[]
+  socialPosts  SocialPost[]
+  revisions    PostRevision[]
+
+  @@map("posts")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique @db.VarChar(100)
+  slug        String    @unique @db.VarChar(100)
+  description String?   @db.Text
+  color       String?   @db.VarChar(7) // Hex color
+  parentId    String?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  posts    Post[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique @db.VarChar(50)
+  slug      String   @unique @db.VarChar(50)
+  color     String?  @db.VarChar(7)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  posts PostTag[]
+
+  @@map("tags")
+}
+
+model PostTag {
+  postId String
+  tagId  String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Media {
+  id           String      @id @default(cuid())
+  filename     String      @db.VarChar(255)
+  originalName String      @db.VarChar(255)
+  mimeType     String      @db.VarChar(100)
+  size         Int
+  width        Int?
+  height       Int?
+  path         String      @db.VarChar(500)
+  url          String      @db.VarChar(500)
+  alt          String?     @db.VarChar(255)
+  caption      String?     @db.Text
+  type         MediaType
+  isPublic     Boolean     @default(true)
+  uploadedBy   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  posts        PostMedia[]
+  variants     MediaVariant[]
+
+  @@map("media")
+}
+
+model MediaVariant {
+  id      String @id @default(cuid())
+  mediaId String
+  size    String @db.VarChar(50) // thumbnail, medium, large
+  width   Int
+  height  Int
+  path    String @db.VarChar(500)
+  url     String @db.VarChar(500)
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, size])
+  @@map("media_variants")
+}
+
+model PostMedia {
+  postId  String
+  mediaId String
+  order   Int    @default(0)
+
+  post  Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([postId, mediaId])
+  @@map("post_media")
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  content   String        @db.Text
+  author    String        @db.VarChar(100)
+  email     String        @db.VarChar(255)
+  website   String?       @db.VarChar(255)
+  status    CommentStatus @default(PENDING)
+  postId    String
+  parentId  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+model UserSession {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique @db.VarChar(255)
+  refreshToken String   @unique @db.VarChar(255)
+  expiresAt    DateTime
+  userAgent    String?  @db.VarChar(500)
+  ipAddress    String?  @db.VarChar(45)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+model SocialProfile {
+  id       String           @id @default(cuid())
+  userId   String
+  platform SocialPlatform
+  username String           @db.VarChar(100)
+  url      String           @db.VarChar(255)
+  isActive Boolean          @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@map("social_profiles")
+}
+
+model SocialPost {
+  id          String           @id @default(cuid())
+  postId      String
+  platform    SocialPlatform
+  socialId    String?          @db.VarChar(255)
+  content     String           @db.Text
+  status      SocialPostStatus @default(PENDING)
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  error       String?          @db.Text
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("social_posts")
+}
+
+model PostRevision {
+  id        String   @id @default(cuid())
+  postId    String
+  title     String   @db.VarChar(255)
+  content   String   @db.LongText
+  excerpt   String?  @db.Text
+  version   Int
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, version])
+  @@map("post_revisions")
+}
+
+model ActivityLog {
+  id        String     @id @default(cuid())
+  userId    String?
+  action    String     @db.VarChar(100)
+  entity    String     @db.VarChar(100)
+  entityId  String?
+  details   Json?
+  ipAddress String?    @db.VarChar(45)
+  userAgent String?    @db.VarChar(500)
+  createdAt DateTime   @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("activity_logs")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique @db.VarChar(100)
+  value Json
+  type  String @db.VarChar(50)
+
+  @@map("settings")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  EDITOR
+  AUTHOR
+  VIEWER
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+}
+
+enum CommentStatus {
+  APPROVED
+  PENDING
+  SPAM
+  TRASH
+}
+
+enum SocialPlatform {
+  TWITTER
+  FACEBOOK
+  LINKEDIN
+  INSTAGRAM
+}
+
+enum SocialPostStatus {
+  PENDING
+  SCHEDULED
+  PUBLISHED
+  FAILED
+} 

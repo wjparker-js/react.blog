@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: gatsby-cms-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: SealTeam6
+      MYSQL_DATABASE: gatsby_blog_cms
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+    networks:
+      - gatsby-cms-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: gatsby-cms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - gatsby-cms-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gatsby-cms-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://root:SealTeam6@mysql:3306/gatsby_blog_cms
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: super-secret-jwt-key-for-production-change-this-123456789
+      JWT_REFRESH_SECRET: super-secret-refresh-key-for-production-change-this-987654321
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      PORT: 3001
+      API_BASE_URL: http://localhost:3001/api
+      FRONTEND_URL: http://localhost:8000
+      ADMIN_URL: http://localhost:3000
+      UPLOAD_DIR: ./uploads
+      MAX_FILE_SIZE: 10485760
+      ALLOWED_IMAGE_TYPES: image/jpeg,image/png,image/gif,image/webp
+      ALLOWED_VIDEO_TYPES: video/mp4,video/webm
+      BCRYPT_ROUNDS: 12
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      IMAGE_QUALITY: 80
+      THUMBNAIL_SIZE: 300
+      MEDIUM_SIZE: 768
+      LARGE_SIZE: 1200
+      LOG_LEVEL: info
+      FROM_EMAIL: noreply@gatsby-cms.com
+    ports:
+      - "3001:3001"
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - gatsby-cms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Admin Dashboard (React)
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: gatsby-cms-admin
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:3001/api
+      REACT_APP_BACKEND_URL: http://localhost:3001
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - gatsby-cms-network
+
+  # Gatsby Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: gatsby-cms-frontend
+    restart: unless-stopped
+    environment:
+      GATSBY_API_URL: http://localhost:3001/api
+      NODE_ENV: production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    networks:
+      - gatsby-cms-network
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: gatsby-cms-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - admin
+      - frontend
+    networks:
+      - gatsby-cms-network
+
+networks:
+  gatsby-cms-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_logs:
+    driver: local 

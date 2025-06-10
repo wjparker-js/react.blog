@@ -1,79 +1,137 @@
-# Gatsby Starter Apple
+# React Blog CMS
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fsungik-choi%2Fgatsby-starter-apple&count_bg=%23FC2350&title_bg=%23555555&icon=gatsby.svg&icon_color=%23E7E7E7&title=HITS&edge_flat=false)](https://hits.seeyoufarm.com)
-
-Gatsby blog starter kit with beautiful responsive design
-
-![Screenshot](.github/screenshot.png)
-
-## 🍎 Demo
-
-👉 **View [Demo Page](https://gatsby-starter-apple.netlify.app)**
+A modern, full-stack blog content management system built with React, Node.js, and MySQL.
 
 ## ✨ Features
 
-- Lighthouse 100 + PWA
-- styled-components
-- Apple style responsive design
-- Prefect dynamic theme (Comment + Code highlight)
-- Beautiful mobile menu animation
-- Code highlighting with [gatsby-remark-vscode](https://github.com/andrewbranch/gatsby-remark-vscode)
-- [Utterances](https://utteranc.es/) Comment
-- Categories support
-- Infinite Scroll with Intersection Observer
-- RSS Feed
-- SEO
-- Offline support
-- Prettier & ESLint
+- 📝 **Blog Management**: Create, edit, and publish blog posts
+- 👥 **Admin Dashboard**: Complete admin interface with analytics
+- 🔐 **Authentication**: Secure login system
+- 📱 **Responsive Design**: Works on all devices
+- 🎨 **Modern UI**: Clean, professional interface
+- 🚀 **Fast Performance**: Optimized for speed
 
-## 🚀 Quick Start
+## 🏃‍♂️ Quick Start
 
-### 1. Create a Gatsby site
+### Prerequisites
+- Node.js (v16 or higher)
+- MySQL database
+- npm or yarn
 
-Use the Gatsby CLI to get started locally:
+### Installation
 
-```shell
-npx gatsby new my-blog https://github.com/sungik-choi/gatsby-starter-apple
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/react-blog.git
+cd react-blog
 ```
 
-### 2. Start developing
-
-In your site directory, start the development server:
-
-```shell
-cd my-blog
-yarn start
+2. **Install dependencies**
+```bash
+npm install
 ```
 
-### 3. Open the source code and start editing
+3. **Set up environment variables**
+```bash
+# Copy example env file
+cp backend/.env.example backend/.env
 
-Your site is now running at `http://localhost:8000`!
-
-Open the `my-blog` directory in your code editor of choice and edit `src/pages/index.js`. Save your changes and the browser will update in real time!
-
-## 🎨 Customization
-
-### Fix meta data
-
-Open **`gatsby-meta-config.js`** and fix meta data of your blog.
-
-```js
-module.exports = {
-  title: "Dev Ed", // Your website title
-  description: `Ed's Blog`, // Your website description
-  author: "Ed", // Maybe your name
-  siteUrl: "https://gatsby-starter-apple.netlify.app", // Your website URL
-  lang: "en", // Language
-  utterances: "sungik-choi/gatsby-starter-apple-comment", // Github repository to store comments
-  links: {
-    github: "https://github.com/sungik-choi/gatsby-starter-apple", // Your github repository
-  },
-  icon: "src/images/icon.png", //  Favicon Path
-}
+# Edit backend/.env with your database credentials
 ```
 
-## 🤗 Contributing
+4. **Start the development servers**
+```bash
+# Option 1: Simple static server (working)
+node simple-server.js
 
-Contributions, issues and feature requests are welcome. Feel free to check issues page if you want to contribute. [Check the contributing guide](./CONTRIBUTING.md).
+# Option 2: Full development environment (requires setup)
+npm run dev
+```
+
+## 🌐 Access Points
+
+- **Main Site**: http://localhost:8000
+- **Blog Posts**: http://localhost:8000/blog
+- **Admin Dashboard**: http://localhost:8000/admin
+- **Admin Login**: http://localhost:8000/admin/login
+
+### Default Admin Credentials
+- **Email**: admin@example.com
+- **Password**: admin123
+
+## 📁 Project Structure
+
+```
+react-blog/
+├── backend/           # Node.js API server
+│   ├── src/          # TypeScript source code
+│   └── .env          # Environment variables
+├── public/           # Static HTML files (current working version)
+├── src/              # React frontend source
+│   ├── components/   # React components
+│   ├── pages/        # Page components
+│   └── posts/        # Markdown blog posts
+├── simple-server.js  # Simple static file server
+└── package.json      # Project dependencies
+```
+
+## 📝 Blog Posts
+
+Sample blog posts are included:
+- Getting Started with Gatsby and TypeScript
+- React Performance Optimization Techniques  
+- Building Modern APIs with Node.js and Prisma
+
+Posts are located in `src/posts/blog/` as Markdown files.
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **CSS3** - Modern styling
+- **HTML5** - Semantic markup
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express** - Web framework
+- **TypeScript** - Type safety
+- **MySQL** - Database
+- **Redis** - Caching
+- **JWT** - Authentication
+
+### Development
+- **Gatsby** - Static site generation (planned)
+- **Webpack** - Module bundling
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+
+## 🚧 Current Status
+
+This is a **working prototype** with:
+- ✅ Static blog site serving content
+- ✅ Admin dashboard interface
+- ✅ Blog post management UI
+- ✅ Responsive design
+- 🔄 Backend API (in development)
+- 🔄 Database integration (in development)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit changes: `git commit -am 'Add feature'`
+4. Push to branch: `git push origin feature-name`
+5. Submit a pull request
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 📧 Contact
+
+For questions or support, please open an issue on GitHub.
+
+---
+
+**Built with ❤️ using React and Node.js**
