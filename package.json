@@ -80,12 +80,19 @@
     "gatsby-plugin-sharp": "^5.14.0",
     "gatsby-plugin-styled-components": "^6.14.0",
     "gatsby-plugin-typography": "^5.14.0",
+    "gatsby-remark-copy-linked-files": "^6.14.0",
+    "gatsby-remark-images": "^7.14.0",
+    "gatsby-remark-vscode": "^3.3.1",
     "gatsby-source-filesystem": "^5.14.0",
+    "gatsby-transformer-remark": "^6.14.0",
     "gatsby-transformer-sharp": "^5.14.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
+    "react-typography": "^0.16.23",
     "styled-components": "^6.1.18",
-    "typescript": "^5.8.3"
+    "styled-reset": "^4.5.2",
+    "typescript": "^5.8.3",
+    "typography": "^0.16.24"
   }
 }

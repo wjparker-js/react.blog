@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+    
+    <!-- Quill.js CDN - replacing TinyMCE -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Main Content Header */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0 1rem 0;
+            margin: 0 20px; /* Align with blog cards */
+        }
+
+        .main-title-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .add-post-icon {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-post-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Categories on same line */
+        .categories {
+            display: flex;
+            align-items: center;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .category-btn {
+            padding: 0.4rem 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-color: transparent;
+            transform: translateY(-1px);
+        }
+
+        /* Blog Grid */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            padding: 0 20px 2rem 20px;
+        }
+
+        .blog-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .blog-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+
+        .blog-content {
+            padding: 1rem;
+        }
+
+        .blog-category {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .blog-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .blog-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            margin: 2% auto;
+            border-radius: 15px;
+            width: 500px;
+            max-height: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: none; /* Hidden labels, using placeholders */
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Quill Editor Styles */
+        .quill-container {
+            height: 200px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .ql-toolbar {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        .ql-container {
+            border: none !important;
+            font-size: 14px;
+            height: calc(200px - 42px);
+        }
+
+        .ql-editor {
+            color: white !important;
+            padding: 12px !important;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: rgba(255, 255, 255, 0.5) !important;
+            font-style: normal !important;
+        }
+
+        /* Image input styling */
+        .image-input-group {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .image-input-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .image-tab-btn {
+            flex: 1;
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .image-tab-btn:last-child {
+            border-right: none;
+        }
+
+        .image-tab-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .image-input-content {
+            padding: 12px;
+        }
+
+        .image-input-tab {
+            display: none;
+        }
+
+        .image-input-tab.active {
+            display: block;
+        }
+
+        .upload-help {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Video embed styling */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            margin: 1rem 0;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        /* Quill editor image styling */
+        .ql-editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        /* Enhanced Quill toolbar styling */
+        .ql-toolbar .ql-formats {
+            margin-right: 15px;
+        }
+
+        .ql-toolbar button {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .ql-toolbar button:hover {
+            color: white !important;
+        }
+
+        .ql-toolbar button.ql-active {
+            color: #667eea !important;
+        }
+
+        /* Blog Detail Modal */
+        .blog-detail-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .blog-detail-content {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            margin: 2% auto;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .blog-detail-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .blog-detail-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .blog-detail-body {
+            padding: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .blog-detail-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .blog-detail-category {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .blog-detail-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .blog-detail-content-text {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .blog-detail-content-text h2 {
+            color: white;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .blog-detail-content-text h3 {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .blog-detail-content-text p {
+            margin-bottom: 1rem;
+        }
+
+        .blog-detail-content-text ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .blog-detail-content-text pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .blog-detail-content-text code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Blog detail content styling for rich media */
+        .blog-detail-content-text img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: block;
+        }
+
+        .blog-detail-content-text .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            margin: 1rem 0;
+        }
+
+        .blog-detail-content-text .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .blog-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .blog-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content {
+                width: 90%;
+                margin: 5% auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Content Header with Categories on Same Line -->
+        <div class="main-header">
+            <div class="main-title-section">
+                <h1 class="main-title">Blog</h1>
+                <button class="add-post-icon" id="addPostBtn" title="Add New Post">+</button>
+            </div>
+            
+            <!-- Categories aligned to the right -->
+            <div class="categories">
+                <div class="category-buttons">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="React">React</button>
+                    <button class="category-btn" data-category="CSS">CSS</button>
+                    <button class="category-btn" data-category="Node.js">Node.js</button>
+                    <button class="category-btn" data-category="Mobile">Mobile</button>
+                    <button class="category-btn" data-category="Design">Design</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blog Grid -->
+        <div class="blog-grid" id="blogGrid">
+            <!-- Blog posts will be dynamically generated here -->
+        </div>
+    </div>
+
+    <!-- Add Post Modal -->
+    <div id="addPostModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Post</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addPostForm">
+                    <div class="form-group">
+                        <label class="form-label" for="postTitle">Title</label>
+                        <input type="text" id="postTitle" class="form-input" placeholder="Post title *" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="postCategory">Category</label>
+                        <input type="text" id="postCategory" class="form-input" placeholder="Category (e.g., React, CSS, Node.js) *" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="postDescription">Description</label>
+                        <textarea id="postDescription" class="form-textarea" rows="2" placeholder="Brief description *" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="postImage">Image</label>
+                        <div class="image-input-group">
+                            <div class="image-input-tabs">
+                                <button type="button" class="image-tab-btn active" data-tab="url">URL</button>
+                                <button type="button" class="image-tab-btn" data-tab="upload">Upload</button>
+                            </div>
+                            <div class="image-input-content">
+                                <div class="image-input-tab active" id="urlTab">
+                                    <input type="url" id="postImageUrl" class="form-input" placeholder="Image URL (e.g., https://example.com/image.jpg)" required>
+                                </div>
+                                <div class="image-input-tab" id="uploadTab">
+                                    <input type="file" id="postImageFile" class="form-input" accept="image/*">
+                                    <div class="upload-help">Choose an image file to upload</div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="postImage" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="postContent">Content</label>
+                        <div class="quill-container">
+                            <div id="postContent"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="savePostBtn">Save Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Detail Modal -->
+    <div id="blogDetailModal" class="blog-detail-modal">
+        <div class="blog-detail-content">
+            <div class="blog-detail-header">
+                <h3 class="blog-detail-title" id="blogDetailTitle"></h3>
+                <button class="close-btn" id="closeBlogDetailBtn">&times;</button>
+            </div>
+            <div class="blog-detail-body">
+                <img id="blogDetailImage" class="blog-detail-image" src="" alt="">
+                <div class="blog-detail-category" id="blogDetailCategory"></div>
+                <div class="blog-detail-description" id="blogDetailDescription"></div>
+                <div class="blog-detail-content-text" id="blogDetailContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample blog data with localStorage integration
+        function getSamplePosts() {
+            return [
+                {
+                    id: 1,
+                    title: "Understanding React Hooks",
+                    description: "A comprehensive guide to React Hooks and how they revolutionize state management in functional components.",
+                    category: "React",
+                    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>Introduction to React Hooks</h2>
+                        <p>React Hooks have transformed the way we write React components. They allow us to use state and other React features without writing a class component.</p>
+                        
+                        <h3>useState Hook</h3>
+                        <p>The useState hook lets you add state to functional components:</p>
+                        <pre><code>const [count, setCount] = useState(0);</code></pre>
+                        
+                        <h3>useEffect Hook</h3>
+                        <p>The useEffect hook lets you perform side effects in functional components.</p>
+                        
+                        <h3>Best Practices</h3>
+                        <ul>
+                            <li>Only call hooks at the top level</li>
+                            <li>Only call hooks from React functions</li>
+                            <li>Use the ESLint plugin for hooks</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 2,
+                    title: "CSS Grid vs Flexbox",
+                    description: "Learn when to use CSS Grid and when to use Flexbox for your layout needs.",
+                    category: "CSS",
+                    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>CSS Grid vs Flexbox</h2>
+                        <p>Both CSS Grid and Flexbox are powerful layout methods, but they excel in different scenarios.</p>
+                        
+                        <h3>When to Use Flexbox</h3>
+                        <ul>
+                            <li>One-dimensional layouts</li>
+                            <li>Content-first design</li>
+                            <li>Component-level layouts</li>
+                        </ul>
+                        
+                        <h3>When to Use CSS Grid</h3>
+                        <ul>
+                            <li>Two-dimensional layouts</li>
+                            <li>Layout-first design</li>
+                            <li>Page-level layouts</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 3,
+                    title: "Flutter vs React Native",
+                    description: "A detailed comparison between Flutter and React Native for mobile app development.",
+                    category: "Mobile",
+                    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>Flutter vs React Native</h2>
+                        <p>Choosing between Flutter and React Native can be challenging. Let's break down the key differences.</p>
+                        
+                        <h3>Performance</h3>
+                        <p>Flutter compiles to native ARM code, while React Native uses a JavaScript bridge.</p>
+                        
+                        <h3>Development Speed</h3>
+                        <p>Both offer hot reload, but Flutter's implementation is generally faster.</p>
+                        
+                        <h3>Community and Ecosystem</h3>
+                        <p>React Native has a larger community and more third-party packages.</p>
+                    `
+                },
+                {
+                    id: 4,
+                    title: "Building Design Systems",
+                    description: "How to create and maintain scalable design systems for your organization.",
+                    category: "Design",
+                    image: "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>Building Design Systems</h2>
+                        <p>A design system is a collection of reusable components, guided by clear standards.</p>
+                        
+                        <h3>Key Components</h3>
+                        <ul>
+                            <li>Typography scales</li>
+                            <li>Color palettes</li>
+                            <li>Spacing systems</li>
+                            <li>Component library</li>
+                        </ul>
+                        
+                        <h3>Benefits</h3>
+                        <p>Design systems provide consistency, efficiency, and scalability across products.</p>
+                    `
+                },
+                {
+                    id: 5,
+                    title: "Node.js Best Practices",
+                    description: "Essential best practices for building robust and scalable Node.js applications.",
+                    category: "Node.js",
+                    image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>Node.js Best Practices</h2>
+                        <p>Follow these best practices to build maintainable and performant Node.js applications.</p>
+                        
+                        <h3>Project Structure</h3>
+                        <p>Organize your code into logical modules and follow a consistent directory structure.</p>
+                        
+                        <h3>Error Handling</h3>
+                        <p>Always handle errors gracefully and use proper logging mechanisms.</p>
+                        
+                        <h3>Security</h3>
+                        <ul>
+                            <li>Use helmet for security headers</li>
+                            <li>Validate and sanitize input</li>
+                            <li>Keep dependencies updated</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 6,
+                    title: "iOS App Development Tips",
+                    description: "Tips and tricks for developing iOS applications with Swift and SwiftUI.",
+                    category: "iOS",
+                    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>iOS App Development Tips</h2>
+                        <p>Developing iOS apps can be challenging. Here are some tips to help you succeed.</p>
+                        
+                        <h3>SwiftUI vs UIKit</h3>
+                        <p>SwiftUI is the future of iOS development, but UIKit is still widely used.</p>
+                        
+                        <h3>App Store Guidelines</h3>
+                        <p>Always follow Apple's App Store guidelines to avoid rejection.</p>
+                        
+                        <h3>Performance Optimization</h3>
+                        <ul>
+                            <li>Use Instruments for profiling</li>
+                            <li>Optimize images and assets</li>
+                            <li>Minimize memory usage</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 7,
+                    title: "UX Research Methods",
+                    description: "A comprehensive guide to user experience research methods and when to use them.",
+                    category: "UX",
+                    image: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>UX Research Methods</h2>
+                        <p>Understanding your users is crucial for creating successful products. Here are key research methods.</p>
+                        
+                        <h3>User Interviews</h3>
+                        <p>One-on-one conversations to understand user needs and pain points.</p>
+                        
+                        <h3>Surveys and Questionnaires</h3>
+                        <p>Collect quantitative data from a larger user base.</p>
+                        
+                        <h3>Usability Testing</h3>
+                        <p>Observe users interacting with your product to identify issues.</p>
+                    `
+                },
+                {
+                    id: 8,
+                    title: "JavaScript ES2023 Features",
+                    description: "Explore the latest features introduced in ECMAScript 2023 and how to use them.",
+                    category: "JavaScript",
+                    image: "https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=500&h=300&fit=crop",
+                    content: `
+                        <h2>JavaScript ES2023 Features</h2>
+                        <p>ES2023 brings several new features that improve developer productivity and code readability.</p>
+                        
+                        <h3>Array.findLast() and Array.findLastIndex()</h3>
+                        <p>Find elements starting from the end of the array.</p>
+                        
+                        <h3>Hashbang Grammar</h3>
+                        <p>Support for shebang comments in JavaScript files.</p>
+                        
+                        <h3>Change Array by Copy</h3>
+                        <p>New methods that return modified copies instead of mutating arrays.</p>
+                    `
+                }
+            ];
+        }
+
+        // Load posts from localStorage or use sample data
+        function loadStoredPosts() {
+            const stored = localStorage.getItem('blogPosts');
+            return stored ? JSON.parse(stored) : getSamplePosts();
+        }
+
+        // Save posts to localStorage
+        function savePostsToStorage(posts) {
+            localStorage.setItem('blogPosts', JSON.stringify(posts));
+        }
+
+        // Global posts array
+        let blogPosts = loadStoredPosts();
+
+        // Initialize Quill editor
+        let quill;
+
+        // Modal elements
+        const addPostModal = document.getElementById('addPostModal');
+        const blogDetailModal = document.getElementById('blogDetailModal');
+        const addPostBtn = document.getElementById('addPostBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeBlogDetailBtn = document.getElementById('closeBlogDetailBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const savePostBtn = document.getElementById('savePostBtn');
+
+        // Custom image handler for Quill
+        function imageHandler() {
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+
+            input.onchange = function() {
+                const file = input.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const range = quill.getSelection();
+                        quill.insertEmbed(range.index, 'image', e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+        }
+
+        // Custom video handler for YouTube embeds
+        function videoHandler() {
+            const url = prompt('Enter YouTube URL:');
+            if (url) {
+                let videoId = '';
+                
+                // Extract video ID from various YouTube URL formats
+                const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                if (match) {
+                    videoId = match[1];
+                    const range = quill.getSelection();
+                    const embedCode = `<div class="video-wrapper"><iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`;
+                    quill.clipboard.dangerouslyPasteHTML(range.index, embedCode);
+                } else {
+                    alert('Please enter a valid YouTube URL');
+                }
+            }
+        }
+
+        // Initialize Quill when modal opens
+        function initializeQuill() {
+            if (quill) {
+                return; // Already initialized
+            }
+            
+            quill = new Quill('#postContent', {
+                theme: 'snow',
+                placeholder: 'Write your blog post content here...',
+                modules: {
+                    toolbar: {
+                        container: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'align': [] }],
+                            ['link', 'image', 'video'],
+                            ['blockquote', 'code-block'],
+                            ['clean']
+                        ],
+                        handlers: {
+                            'image': imageHandler,
+                            'video': videoHandler
+                        }
+                    }
+                }
+            });
+        }
+
+        // Open modal
+        function openModal() {
+            addPostModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Initialize Quill editor when modal opens
+            setTimeout(() => {
+                initializeQuill();
+            }, 100);
+        }
+
+        // Close modal
+        function closeModal() {
+            addPostModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            document.getElementById('addPostForm').reset();
+            if (quill) {
+                quill.setContents([]);
+            }
+        }
+
+        // Open blog detail modal
+        function openBlogDetail(post) {
+            document.getElementById('blogDetailTitle').textContent = post.title;
+            document.getElementById('blogDetailImage').src = post.image;
+            document.getElementById('blogDetailCategory').textContent = post.category;
+            document.getElementById('blogDetailDescription').textContent = post.description;
+            document.getElementById('blogDetailContent').innerHTML = post.content;
+            
+            blogDetailModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close blog detail modal
+        function closeBlogDetail() {
+            blogDetailModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event listeners
+        addPostBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        closeBlogDetailBtn.addEventListener('click', closeBlogDetail);
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === addPostModal) {
+                closeModal();
+            }
+            if (e.target === blogDetailModal) {
+                closeBlogDetail();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (addPostModal.style.display === 'block') {
+                    closeModal();
+                }
+                if (blogDetailModal.style.display === 'block') {
+                    closeBlogDetail();
+                }
+            }
+        });
+
+        // Image tab functionality
+        document.querySelectorAll('.image-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                
+                // Update tab buttons
+                document.querySelectorAll('.image-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.image-input-tab').forEach(t => t.classList.remove('active'));
+                document.getElementById(tab + 'Tab').classList.add('active');
+            });
+        });
+
+        // Handle file upload
+        document.getElementById('postImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('postImage').value = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select a valid image file.');
+                    e.target.value = '';
+                }
+            }
+        });
+
+        // Handle URL input
+        document.getElementById('postImageUrl').addEventListener('input', function(e) {
+            document.getElementById('postImage').value = e.target.value;
+        });
+
+        // Generate category buttons dynamically
+        function generateCategoryButtons() {
+            const categoriesContainer = document.querySelector('.category-buttons');
+            
+            // Count category frequencies
+            const categoryCount = {};
+            blogPosts.forEach(post => {
+                categoryCount[post.category] = (categoryCount[post.category] || 0) + 1;
+            });
+            
+            // Sort by frequency (most common first)
+            const sortedCategories = Object.entries(categoryCount)
+                .sort((a, b) => b[1] - a[1])
+                .map(entry => entry[0]);
+            
+            // Top 5 categories plus "All"
+            const topCategories = ['All', ...sortedCategories.slice(0, 5)];
+            
+            // Generate buttons
+            categoriesContainer.innerHTML = topCategories.map(category => {
+                const dataCategory = category === 'All' ? 'all' : category;
+                const activeClass = category === 'All' ? ' active' : '';
+                return `<button class="category-btn${activeClass}" data-category="${dataCategory}">${category}</button>`;
+            }).join('');
+            
+            // Re-attach event listeners
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterPosts(btn.dataset.category);
+                });
+            });
+        }
+
+        // Save post
+        savePostBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('postTitle').value.trim();
+            const category = document.getElementById('postCategory').value.trim();
+            const description = document.getElementById('postDescription').value.trim();
+            const image = document.getElementById('postImage').value.trim();
+            const content = quill ? quill.root.innerHTML : '';
+            
+            if (!title || !category || !description || !image) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            if (!quill || !content.trim() || content === '<p><br></p>') {
+                alert('Please add some content to your post.');
+                return;
+            }
+            
+            const newPost = {
+                id: Date.now(),
+                title: title,
+                description: description,
+                category: category,
+                image: image,
+                content: content
+            };
+            
+            blogPosts.unshift(newPost);
+            savePostsToStorage(blogPosts);
+            renderBlogPosts(blogPosts);
+            generateCategoryButtons(); // Update category buttons
+            closeModal();
+            
+            // Add success feedback
+            const originalText = savePostBtn.textContent;
+            savePostBtn.textContent = 'Post Saved!';
+            savePostBtn.style.background = '#10b981';
+            setTimeout(() => {
+                savePostBtn.textContent = originalText;
+                savePostBtn.style.background = '';
+            }, 2000);
+        });
+
+        // Render blog posts
+        function renderBlogPosts(posts) {
+            const blogGrid = document.getElementById('blogGrid');
+            blogGrid.innerHTML = '';
+            
+            posts.forEach(post => {
+                const blogCard = document.createElement('div');
+                blogCard.className = 'blog-card';
+                blogCard.innerHTML = `
+                    <img src="${post.image}" alt="${post.title}" class="blog-image" onerror="this.src='https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=500&h=300&fit=crop'">
+                    <div class="blog-content">
+                        <div class="blog-category">${post.category}</div>
+                        <h3 class="blog-title">${post.title}</h3>
+                        <p class="blog-description">${post.description}</p>
+                    </div>
+                `;
+                
+                blogCard.addEventListener('click', () => openBlogDetail(post));
+                blogGrid.appendChild(blogCard);
+            });
+        }
+
+        // Category filtering
+        function filterPosts(category) {
+            const filteredPosts = category === 'all' 
+                ? blogPosts 
+                : blogPosts.filter(post => post.category === category);
+            renderBlogPosts(filteredPosts);
+        }
+
+        // Initialize image tab functionality
+        document.querySelectorAll('.image-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                
+                // Update tab buttons
+                document.querySelectorAll('.image-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.image-input-tab').forEach(t => t.classList.remove('active'));
+                document.getElementById(tab + 'Tab').classList.add('active');
+            });
+        });
+
+        // Handle file upload
+        document.getElementById('postImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('postImage').value = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select a valid image file.');
+                    e.target.value = '';
+                }
+            }
+        });
+
+        // Handle URL input
+        document.getElementById('postImageUrl').addEventListener('input', function(e) {
+            document.getElementById('postImage').value = e.target.value;
+        });
+
+        // Generate category buttons dynamically
+        function generateCategoryButtons() {
+            const categoriesContainer = document.querySelector('.category-buttons');
+            
+            // Count category frequencies
+            const categoryCount = {};
+            blogPosts.forEach(post => {
+                categoryCount[post.category] = (categoryCount[post.category] || 0) + 1;
+            });
+            
+            // Sort by frequency (most common first)
+            const sortedCategories = Object.entries(categoryCount)
+                .sort((a, b) => b[1] - a[1])
+                .map(entry => entry[0]);
+            
+            // Top 5 categories plus "All"
+            const topCategories = ['All', ...sortedCategories.slice(0, 5)];
+            
+            // Generate buttons
+            categoriesContainer.innerHTML = topCategories.map(category => {
+                const dataCategory = category === 'All' ? 'all' : category;
+                const activeClass = category === 'All' ? ' active' : '';
+                return `<button class="category-btn${activeClass}" data-category="${dataCategory}">${category}</button>`;
+            }).join('');
+            
+            // Re-attach event listeners
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterPosts(btn.dataset.category);
+                });
+            });
+        }
+
+        // Initial render
+        renderBlogPosts(blogPosts);
+        generateCategoryButtons();
+    </script>
+</body>
+</html> 
